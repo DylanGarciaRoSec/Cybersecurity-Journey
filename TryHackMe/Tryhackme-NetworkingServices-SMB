@@ -1,0 +1,34 @@
+# Networking Services / SMB Walkthrough
+
+## Objective:
+Gain unauthorized access to a machine exploiting SMB
+
+## Tools Used
+- nmap (Network scanning and service enumeration)
+- enum4linux (SMB enumeration)
+- SMBclient (Accessing SMB shares)
+- ssh (secure shell access using a private key)
+- chmod (Adjusting file permissions)
+
+## Enumerating SMB
+1. ran a service/version detection nmap scan with aggressive timing
+- 'nmap -A -T4 -Pn [TARGET_IP]' and found open SMB port 139/445
+2. conducted a full basic enumeration using 'enum4linux -a' and revealed smb share "profiles"
+
+## Exploiting SMB
+1. used the following SMBclient syntax to acess "profiles" smb share on port 139/445, leading to a shell
+- smbclient //[IP]/[SHARE] -U [USERNAME] -p 139/445
+2. once inside the share, listed the directory and found document that gave information regarding services that configured the target to work from home (SSH).
+3. Looked into the ssh directory and found authentication keys (id_rsa) that allow a user to authenticate themselves on, and then access a server
+4. Downloaded id_rsa file, and changed permissions to "600" using "chmod 600 [file]" to fix private key permissions.
+5. Displayed id_rsa file and found username of the account (cactus).
+6. After obtaining the private key (id_rsa), I used the following command to gain SSH access to the target machine:
+- ssh -i id_rsa cactus@[IP]
+
+## Conclusion
+Successfully exploited misconfigured network service SMB by gaining unauthorized access to important smb share via SSH using a leaked private key. This challenges shows the importance of securing file shares, restricting anonymous access, and properly managing key file permissions.
+
+## Skills demonstrated
+enumeration, SMB exploitation, key-based SSH access, permission handling.
+
+
