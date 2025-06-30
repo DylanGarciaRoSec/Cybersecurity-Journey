@@ -3,3 +3,7 @@
 ## OBjective 
 Exploit a misconfigured telnet service to gain unauthorized access
 
+## Tools Used
+- Nmap
+- Netcat
+- Msfvenom
